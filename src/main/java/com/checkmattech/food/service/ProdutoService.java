@@ -46,4 +46,19 @@ public class ProdutoService {
         movimentacaoEstoqueRepository.save(mov);
         return mov;
     }
+
+    @Transactional
+    public MovimentacaoEstoqueDomain saidaEstoque(Long  produtoID, BigDecimal quantidade, String observacao){
+        if(quantidade == null || quantidade.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Quantidade nao pode ser menor que 0");
+
+        ProdutoDomain produto = buscarID(produtoID);
+        if(produto.getEstoqueAtual().compareTo(quantidade) < 0) throw new IllegalArgumentException("Estoque insuficiente");
+
+        produto.removerEstoque(quantidade);
+        produtoRepository.save(produto);
+
+        MovimentacaoEstoqueDomain mov = new MovimentacaoEstoqueDomain(produto, quantidade, TipoMovimentoDomain.Sainda, observacao);
+        movimentacaoEstoqueRepository.save(mov);
+        return mov;
+    }
 }
